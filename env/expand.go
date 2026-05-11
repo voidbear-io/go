@@ -35,6 +35,10 @@ type ExpandOptions struct {
 	EnableShellExpansion bool
 	UseShell             string
 	ShellArgs            []string
+	// CustomExpander, if non-nil, is invoked on the fully expanded string so you can
+	// scan and rewrite fragments (e.g. akv://vault/key → a resolved secret). It runs once
+	// after standard expansion, covering both substituted values and literal segments.
+	CustomExpander func(string) (string, error)
 }
 
 type ExpandOption func(*ExpandOptions)
@@ -78,6 +82,14 @@ func WithEnableShellExpansion(enable bool) ExpandOption {
 func WithShell(shell string) ExpandOption {
 	return func(o *ExpandOptions) {
 		o.UseShell = shell
+	}
+}
+
+// WithCustomExpander sets a hook that receives the full expansion result and can replace
+// patterns such as custom URI schemes in environment-backed or literal text.
+func WithCustomExpander(f func(string) (string, error)) ExpandOption {
+	return func(o *ExpandOptions) {
+		o.CustomExpander = f
 	}
 }
 
@@ -525,6 +537,14 @@ func ExpandWithOptions(input string, options *ExpandOptions) (string, error) {
 
 	out := output.String()
 	output.Reset()
+
+	if o.CustomExpander != nil {
+		var err error
+		out, err = o.CustomExpander(out)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	return out, nil
 }

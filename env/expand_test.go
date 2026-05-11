@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/voidbear-io/go/env"
@@ -212,5 +213,35 @@ func TestExpand_ExpandUnixArgs(t *testing.T) {
 	}
 	if out != "Arg1: first" {
 		t.Errorf("expected 'Arg1: first', got '%s'", out)
+	}
+}
+
+func TestExpand_CustomExpander_ReplacesSchemesInOutput(t *testing.T) {
+	get := func(key string) string {
+		if key == "REF" {
+			return "akv://vault/mysecret"
+		}
+		return ""
+	}
+	custom := func(s string) (string, error) {
+		return strings.ReplaceAll(s, "akv://vault/mysecret", "supersecret"), nil
+	}
+	out, err := env.Expand("x=${REF} y=akv://vault/mysecret", env.WithGet(get), env.WithCustomExpander(custom))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "x=supersecret y=supersecret"
+	if out != want {
+		t.Errorf("expected %q, got %q", want, out)
+	}
+}
+
+func TestExpand_CustomExpander_Error(t *testing.T) {
+	custom := func(string) (string, error) {
+		return "", errors.New("boom")
+	}
+	_, err := env.Expand("hello", env.WithCustomExpander(custom))
+	if err == nil || err.Error() != "boom" {
+		t.Fatalf("expected boom, got %v", err)
 	}
 }
