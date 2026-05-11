@@ -86,3 +86,23 @@ jobs:
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
+
+  release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/cmdargs/')
+    needs: [build, lint, vuln]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 🧳 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📣 Create release with generated notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ver="${GITHUB_REF_NAME#cmdargs/}"
+          gh release create "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --title "cmdargs ${ver}"
