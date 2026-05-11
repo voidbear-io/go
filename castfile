@@ -1,0 +1,7 @@
+workspace: true
+
+
+tasks:
+  install-govuln:
+    run: go install golang.org/x/vuln/cmd/govulncheck@latest   
+    use: shell

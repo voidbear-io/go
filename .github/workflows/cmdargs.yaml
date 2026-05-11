@@ -1,0 +1,88 @@
+name: cmdargs
+
+on:
+  push:
+    paths:
+      - 'cmdargs/**'
+      - '.github/workflows/cmdargs.yaml'
+    tags:
+      - 'cmdargs/v*'
+    branches:
+      - '**'
+  pull_request:
+    paths:
+      - 'cmdargs/**'
+      - '.github/workflows/cmdargs.yaml'
+
+  schedule:
+    - cron: '17 0 * * 0' # Every Sunday at 12:17 am
+
+env:
+  GOVERSION: '1.22.x'
+  GOLANGCI_LINT_VERSION: v2.11.4
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./cmdargs
+    steps:
+      - name: 🟣 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GOVERSION }}
+
+      - name: 🧳 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔃 Restore
+        run: go mod tidy
+
+      - name: 🏭 Build
+        run: go build -v ./...
+
+      - name: 🧪 Test
+        run: go test -v ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cmdargs
+    steps:
+      - name: 🧳 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟣 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GOVERSION }}
+
+      - name: 🧹 golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: cmdargs
+
+  vuln:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cmdargs
+    steps:
+      - name: 🧳 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟣 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GOVERSION }}
+
+      - name: 🔐 govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...

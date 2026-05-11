@@ -1,0 +1,5 @@
+[tools]
+go = "1.26.2"
+deno = 'latest'
+'github:frostyeti/cast' = '0.3.2'
+golangci-lint = '2.11.4'

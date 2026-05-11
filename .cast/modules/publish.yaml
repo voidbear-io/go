@@ -1,0 +1,52 @@
+
+tasks:
+
+  publish:dir:
+    run: echo $CAST_DIR $MODULE
+    use: bash
+
+  bump:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --bump --patch
+    use: bash
+
+  minor:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --bump --minor
+    use: bash
+
+  major:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --bump --major
+    use: bash
+
+  set-version:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --value $VERSION
+    use: bash
+
+  # Strip prerelease and build metadata (e.g. 1.0.0-alpha.1+foo -> 1.0.0)
+  release:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --release
+    use: bash
+
+  # Set prerelease; optional PRE_NUM (e.g. PRE_NUM=5 -> -alpha.5; unset -> -alpha.0)
+  alpha:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --alpha${PRE_NUM:+ $PRE_NUM}
+    use: bash
+
+  beta:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --beta${PRE_NUM:+ $PRE_NUM}
+    use: bash
+
+  rc:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --rc${PRE_NUM:+ $PRE_NUM}
+    use: bash
+
+  patch:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --bump --patch
+    use: bash
+
+  tag:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --tag
+    use: bash
+
+  tag-local:
+    run: deno run -A $CAST_DIR/scripts/publish.ts $MODULE --tag --skip-push
+    use: bash

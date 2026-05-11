@@ -1,0 +1,34 @@
+
+
+tasks:
+  build:
+    run: go build -o ../bin/$MODULE ./...
+    use: shell
+
+  test:
+    run: go test ./...
+    use: shell
+
+  lint:
+    run: golangci-lint run ./...
+    use: shell
+
+  fmt:
+    run: go fmt ./...
+    use: shell
+
+  check:
+    run: go check ./...
+    use: shell
+
+  tidy:
+    run: go mod tidy
+    use: shell
+
+  mod-verify:
+    run: go mod verify
+    use: shell
+
+  vuln:
+    run: govulncheck ./...
+    use: shell
