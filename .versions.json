@@ -4,5 +4,5 @@
     "dotenv": "0.0.0-alpha.0",
     "env": "0.0.0-alpha.0",
     "exec": "0.0.0",
-    "secrets": "0.0.0"
+    "secrets": "0.0.0-alpha.0"
 }
